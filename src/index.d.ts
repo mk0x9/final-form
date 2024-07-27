@@ -210,6 +210,8 @@ export interface FormApi<
   FormValues = Record<string, any>,
   InitialFormValues = Partial<FormValues>,
 > {
+  startBatch: () => void;
+  endBatch: () => void;
   batch: (fn: () => void) => void;
   blur: (name: keyof FormValues) => void;
   change: <F extends keyof FormValues>(name: F, value?: FormValues[F]) => void;
@@ -316,6 +318,7 @@ export interface Config<
     values: FormValues,
   ) => ValidationErrors | Promise<ValidationErrors>;
   validateOnBlur?: boolean;
+  validateOnDemandOnly?: boolean;
 }
 
 export type Decorator<

@@ -127,6 +127,76 @@ describe("Field.validation", () => {
     expect(validate).toHaveBeenCalledTimes(3);
   });
 
+  it("should validate only before submit when validateOnlyOnDemand is true", () => {
+    const validate = jest.fn((values) => {
+      debugger;
+      const errors = {};
+      if (!values.foo) {
+        errors.foo = "Required";
+      }
+      return errors;
+    });
+
+    const form = createForm({
+      onSubmit: onSubmitMock,
+      validate,
+      validateOnDemandOnly: true,
+    });
+
+    expect(validate).toHaveBeenCalledTimes(0);
+
+    const spy = jest.fn();
+    form.registerField("foo", spy, { error: true });
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0].error).toBeUndefined(); // no validation run yet
+    expect(validate).toHaveBeenCalledTimes(0);
+
+    form.focus("foo");
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(validate).toHaveBeenCalledTimes(0); // not called on focus
+    form.change("foo", "t");
+    expect(spy).toHaveBeenCalledTimes(1); // error not updated
+    expect(validate).toHaveBeenCalledTimes(0);
+    form.change("foo", "ty");
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(validate).toHaveBeenCalledTimes(0);
+    form.change("foo", "typ");
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(validate).toHaveBeenCalledTimes(0);
+    form.change("foo", "typi");
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(validate).toHaveBeenCalledTimes(0);
+    form.change("foo", "typin");
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(validate).toHaveBeenCalledTimes(0);
+    form.change("foo", "typing");
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(validate).toHaveBeenCalledTimes(0);
+    form.blur("foo");
+    // expect(spy).toHaveBeenCalledTimes(2);
+    //expect(spy.mock.calls[1][0].error).toBeUndefined();
+    expect(validate).toHaveBeenCalledTimes(0); // called on blur
+
+    form.submit();
+
+    expect(validate).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    // now user goes to empty the field
+    form.focus("foo");
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(validate).toHaveBeenCalledTimes(1);
+    form.change("foo", "");
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(validate).toHaveBeenCalledTimes(1);
+    form.blur("foo");
+    expect(spy).toHaveBeenCalledTimes(1);
+    form.submit();
+    expect(spy.mock.calls[1][0].error).toBe("Required");
+    expect(validate).toHaveBeenCalledTimes(2);
+  });
+
   it("should return first subscribed field's error first", () => {
     const form = createForm({ onSubmit: onSubmitMock });
     const spy1 = jest.fn();

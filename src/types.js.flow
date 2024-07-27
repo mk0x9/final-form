@@ -212,6 +212,8 @@ export type ConfigKey =
   | "validateOnBlur";
 
 export type FormApi<FormValues: FormValuesShape> = {
+  startBatch: () => void,
+  endBatch: () => void,
   batch: (fn: () => void) => void,
   blur: (name: string) => void,
   change: (name: string, value: ?any) => void,
@@ -296,6 +298,7 @@ export type Config<FormValues: FormValuesShape> = {
   ) => ?Object | Promise<?Object> | void,
   validate?: (values: Object) => Object | Promise<Object>,
   validateOnBlur?: boolean,
+  validateOnDemandOnly?: boolean,
 };
 
 export type Decorator<FormValues: FormValuesShape> = (
