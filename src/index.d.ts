@@ -318,6 +318,7 @@ export interface Config<
     values: FormValues,
   ) => ValidationErrors | Promise<ValidationErrors>;
   validateOnBlur?: boolean;
+  validateOnDemandOnly?: boolean;
 }
 
 export type Decorator<

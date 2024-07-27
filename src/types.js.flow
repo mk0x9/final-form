@@ -298,6 +298,7 @@ export type Config<FormValues: FormValuesShape> = {
   ) => ?Object | Promise<?Object> | void,
   validate?: (values: Object) => Object | Promise<Object>,
   validateOnBlur?: boolean,
+  validateOnDemandOnly?: boolean,
 };
 
 export type Decorator<FormValues: FormValuesShape> = (

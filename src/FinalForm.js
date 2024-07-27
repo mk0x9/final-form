@@ -177,6 +177,7 @@ function createForm<FormValues: FormValuesShape>(
     onSubmit,
     validate,
     validateOnBlur,
+    validateOnDemandOnly,
   } = config;
   if (!onSubmit) {
     throw new Error("No onSubmit function specified");
@@ -205,8 +206,8 @@ function createForm<FormValues: FormValuesShape>(
     lastFormState: undefined,
   };
   let inBatch = 0;
-  let validationPaused = false;
-  let validationBlocked = false;
+  let validationPaused = validateOnDemandOnly || false;
+  let validationBlocked = validateOnDemandOnly || false;
   let preventNotificationWhileValidationPaused = false;
   let nextAsyncValidationKey = 0;
   const asyncValidationPromises: { [number]: Promise<*> } = {};
@@ -684,10 +685,13 @@ function createForm<FormValues: FormValuesShape>(
       (key) => (state.fields[key].modifiedSinceLastSubmit = false),
     );
 
-  // generate initial errors
-  runValidation(undefined, () => {
-    notifyFormListeners();
-  });
+  debugger;
+  if (!config.validateOnDemandOnly) {
+    // generate initial errors
+    runValidation(undefined, () => {
+      notifyFormListeners();
+    });
+  }
 
   const api: FormApi<FormValues> = {
     startBatch: () => {
@@ -1114,6 +1118,11 @@ function createForm<FormValues: FormValuesShape>(
       delete formState.submitErrors;
       delete formState.submitError;
       formState.lastSubmittedValues = { ...formState.values };
+
+      if (validateOnDemandOnly) {
+        api.resumeValidation();
+        api.pauseValidation();
+      }
 
       if (hasSyncErrors()) {
         markAllFieldsTouched();
