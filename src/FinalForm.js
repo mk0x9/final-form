@@ -690,12 +690,22 @@ function createForm<FormValues: FormValuesShape>(
   });
 
   const api: FormApi<FormValues> = {
-    batch: (fn: () => void) => {
+    startBatch: () => {
       inBatch++;
-      fn();
+    },
+
+    endBatch: () => {
       inBatch--;
-      notifyFieldListeners();
-      notifyFormListeners();
+      if (!inBatch) {
+        notifyFieldListeners();
+        notifyFormListeners();
+      }
+    },
+
+    batch: (fn: () => void) => {
+      api.startBatch();
+      fn();
+      api.endBatch();
     },
 
     blur: (name: string) => {

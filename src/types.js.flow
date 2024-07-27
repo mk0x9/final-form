@@ -212,6 +212,8 @@ export type ConfigKey =
   | "validateOnBlur";
 
 export type FormApi<FormValues: FormValuesShape> = {
+  startBatch: () => void,
+  endBatch: () => void,
   batch: (fn: () => void) => void,
   blur: (name: string) => void,
   change: (name: string, value: ?any) => void,
